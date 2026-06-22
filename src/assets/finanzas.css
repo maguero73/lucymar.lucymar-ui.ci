@@ -1,0 +1,131 @@
+.finanzas-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.dashboard-header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--accent-color) 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-header p {
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 3rem;
+    text-decoration: none;
+    color: var(--texto-principal);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--accent-color);
+    box-shadow: 0 20px 40px rgba(var(--accent-color-rgb), 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.card-icon {
+    font-size: 4.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.dashboard-card h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.dashboard-card p {
+    font-size: 1rem;
+    opacity: 0.7;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.card-badge {
+    padding: 0.5rem 1.5rem;
+    background: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 4rem;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: var(--texto-principal);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-back-home:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-5px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .dashboard-card {
+        padding: 2rem;
+    }
+}

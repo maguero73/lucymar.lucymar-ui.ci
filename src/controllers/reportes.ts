@@ -1,69 +1,35 @@
 import api from '@/helpers/api';
 
-
-
 const reportesApi = {
-
     getAnios() {
-
-        return api.get(
-            '/reportes/anios'
-        );
-
+        return api.get('/reportes/anios');
     },
 
-    getGastosAnuales(
-        codTitular: number,
-        codGasto: number
-    ) {
-
-        return api.get(
-            '/reportes/gastos-anuales',
-
-            {
-
-                params: {
-
-                    cod_titular: codTitular,
-
-                    cod_gasto: codGasto
-
-                }
-
+    getGastosAnuales(codTitular: number, codGasto: number) {
+        return api.get('/reportes/gastos-anuales', {
+            params: {
+                cod_titular: codTitular,
+                cod_gasto: codGasto
             }
-
-        );
-
+        });
     },
 
-    consolidarGastos(
-        filtros: any
-    ) {
-
-        return api.post(
-
-            '/consolidado_gastos',
-
-            filtros
-
-        );
-
+    getIngresosAnuales(codTitular: number, codIngreso: number) {
+        return api.get('/reportes/ingresos-anuales', {
+            params: {
+                cod_titular: codTitular,
+                cod_ingreso: codIngreso
+            }
+        });
     },
 
-    consolidarIngresos(
-        filtros: any
-    ) {
+    consolidarGastos(filtros: any) {
+        return api.post('/consolidado_gastos', filtros);
+    },
 
-        return api.post(
-
-            '/consolidado_ingresos',
-
-            filtros
-
-        );
-
+    consolidarIngresos(filtros: any) {
+        return api.post('/consolidado_ingresos', filtros);
     }
-
 };
 
 export default reportesApi;

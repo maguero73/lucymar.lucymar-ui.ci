@@ -1,169 +1,122 @@
 <template>
-    <div class="cuadrante" id="resultados">
+  <div class="estado-resultados-container">
+    <div class="header-section">
       <h2>Estado de Resultados</h2>
-      <p class="description">Consulta el consolidado de tus gastos actualizados.</p>
-      
-      <div class="filtros-container">
-        <h3>Filtros de Consolidación</h3>
-        <div class="filtros-grid">
-          <div class="form-group">
-            <label for="fecha_desde">Fecha Desde</label>
-            <input type="date" id="fecha_desde" v-model="filtros.fecha_desde">
-          </div>
-          <div class="form-group">
-            <label for="fecha_hasta">Fecha Hasta</label>
-            <input type="date" id="fecha_hasta" v-model="filtros.fecha_hasta">
-          </div>
-          <div class="form-group">
-            <label for="cod_titular">Cód. Titular (0 = todos)</label>
-            <input type="text" id="cod_titular" v-model="filtros.cod_titular" placeholder="Ej: 1, 2">
-          </div>
-          <div class="form-group">
-            <label for="cod_gasto">Cód. Gasto (0 = todos)</label>
-            <input type="text" id="cod_gasto" v-model="filtros.cod_gasto" placeholder="Ej: 10, 20">
-          </div>
-          <div class="form-group">
-            <label for="codigo_moneda">Moneda</label>
-            <select id="codigo_moneda" v-model="filtros.codigo_moneda">
-              <option value="ARS">ARS</option>
-              <option value="USD">USD</option>
-            </select>
-          </div>
-          <div class="tabs">
-            <button
-              :class="{ active: tabActiva === 'gastos' }"
-              @click="tabActiva = 'gastos'"
-            >
-              Gastos
-            </button>
+      <p class="description">Consulta el consolidado de tus movimientos financieros.</p>
+    </div>
 
-            <button
-              :class="{ active: tabActiva === 'ingresos' }"
-              @click="tabActiva = 'ingresos'"
-            >
-              Ingresos
-            </button>
-          </div>
+    <!-- Pestañas Superiores -->
+    <div class="tabs-modernas">
+      <button 
+        class="tab-btn" 
+        :class="{ active: store.tabActiva === 'gastos' }"
+        @click="store.setTab('gastos')"
+      >
+        Gastos
+      </button>
+      <button 
+        class="tab-btn" 
+        :class="{ active: store.tabActiva === 'ingresos' }"
+        @click="store.setTab('ingresos')"
+      >
+        Ingresos
+      </button>
+    </div>
+
+    <!-- Filtros Glassmorphism -->
+    <div class="filtros-glass">
+      <div class="filtros-grid">
+        <div class="form-group">
+          <label for="fecha_desde">Fecha Desde</label>
+          <input type="date" id="fecha_desde" v-model="store.filtros.fecha_desde">
+        </div>
+        <div class="form-group">
+          <label for="fecha_hasta">Fecha Hasta</label>
+          <input type="date" id="fecha_hasta" v-model="store.filtros.fecha_hasta">
+        </div>
+        <div class="form-group">
+          <label for="cod_titular">Cód. Titular (0 = todos)</label>
+          <input type="text" id="cod_titular" v-model="store.filtros.cod_titular" placeholder="Ej: 1, 2">
+        </div>
+        <div class="form-group">
+          <label for="cod_concepto">{{ store.tabActiva === 'gastos' ? 'Cód. Gasto' : 'Cód. Ingreso' }} (0 = todos)</label>
+          <input type="text" id="cod_concepto" v-model="store.filtros.cod_gasto" placeholder="Ej: 10, 20">
+        </div>
+        <div class="form-group">
+          <label for="codigo_moneda">Moneda</label>
+          <select id="codigo_moneda" v-model="store.filtros.codigo_moneda">
+            <option value="ARS">ARS</option>
+            <option value="USD">USD</option>
+          </select>
         </div>
       </div>
-  
+
       <div class="actions">
-        <button @click="consolidarGastos" :disabled="loading" class="btn-consolidar">
-          <span v-if="loading" class="loader"></span>
-          <span v-else>Consolidar Gastos</span>
+        <button @click="store.consolidar" :disabled="store.loading" class="btn-modern">
+          <div v-if="store.loading" class="loader-spinner"></div>
+          <span v-else>Consolidar {{ store.tabActiva === 'gastos' ? 'Gastos' : 'Ingresos' }}</span>
         </button>
       </div>
-  
-      <div v-if="error" class="error-msg">
-        {{ error }}
-      </div>
-  
-      <div v-if="resultados && resultados.length > 0" class="resultados-container">
-        <h3>Resumen de Gastos</h3>
-        
-        <!-- DEBUG: Eliminar luego -->
-        <details style="margin-bottom: 1rem; background: #eee; padding: 0.5rem;">
-          <summary>Ver datos crudos (Debug)</summary>
-          <pre>{{ resultados }}</pre>
-        </details>
+    </div>
 
-        <div class="table-responsive">
-          <table class="resultados-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Titular</th>
-                <th>Gasto</th>
-                <th>Moneda</th>
-                <th>Monto</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in resultados" :key="index">
-                <td>{{ formatDate(item.fecha) }}</td>
-                <td>{{ item.titular || item.cod_titular || 'Sin datos' }}</td>
-                <td>{{ item.nombre_gasto || item.cod_gasto || 'Sin datos' }}</td>
-                <td>{{ item.codigo_moneda }}</td>
-                <td class="monto">{{ formatCurrency(item.monto, item.codigo_moneda) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div v-else-if="resultados && resultados.length === 0" class="no-results">
-        <p>No se encontraron resultados para los filtros seleccionados.</p>
+    <!-- Mensajes de Error -->
+    <div v-if="store.error" class="error-card">
+      <p>{{ store.error }}</p>
+    </div>
+
+    <!-- Resultados -->
+    <div v-if="store.resultados && store.resultados.length > 0" class="resultados-section">
+      <div class="table-container">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Titular</th>
+              <th>{{ store.tabActiva === 'gastos' ? 'Gasto' : 'Ingreso' }}</th>
+              <th>Moneda</th>
+              <th style="text-align: right;">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in store.resultados" :key="index">
+              <td>{{ formatDate(item.fecha) }}</td>
+              <td>{{ item.titular || item.cod_titular || 'Sin datos' }}</td>
+              <td>{{ item.nombre_gasto || item.nombre_ingreso || item.cod_gasto || item.cod_ingreso || 'Sin datos' }}</td>
+              <td>{{ item.codigo_moneda }}</td>
+              <td class="monto" :class="store.tabActiva === 'gastos' ? 'monto-negativo' : 'monto-positivo'" style="text-align: right;">
+                {{ formatCurrency(item.monto, item.codigo_moneda) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import '@/assets/resultados.css'
-  import { ref, reactive } from 'vue'
-  import api from '@/helpers/api'
-  
-  const resultados = ref(null)
-  const loading = ref(false)
-  const error = ref('')
-  
-  // Inicializamos fechas con el día de hoy
-  const today = new Date().toISOString().split('T')[0]
-  
-  const filtros = reactive({
-    fecha_desde: today,
-    fecha_hasta: today,
-    cod_titular: '0',
-    cod_gasto: '0',
-    codigo_moneda: 'ARS'
-  })
-  
-  const consolidarGastos = async () => {
-    loading.value = true
-    error.value = ''
-    resultados.value = null
-  
-    try {
-      // Preparamos el payload convirtiendo strings a arrays de números
-      const payload = {
-        fecha_desde: filtros.fecha_desde,
-        fecha_hasta: filtros.fecha_hasta,
-        cod_titular: filtros.cod_titular.split(',').map(n => parseInt(n.trim()) || 0),
-        cod_gasto: filtros.cod_gasto.split(',').map(n => parseInt(n.trim()) || 0),
-        codigo_moneda: filtros.codigo_moneda
-      }
-  
-      const response = await api.post('/consolidado_gastos', payload)
-      console.log('Respuesta consolidado:', response.data)
-      // Aseguramos que sea un array
-      resultados.value = Array.isArray(response.data) ? response.data : [response.data]
-    } catch (err) {
-      console.error('Error al consolidar gastos:', err)
-      if (err.response) {
-        const detail = err.response.data?.detail || err.response.statusText || 'Error desconocido';
-        error.value = `Error del servidor (${err.response.status}): ${typeof detail === 'object' ? JSON.stringify(detail) : detail}`
-      } else if (err.request) {
-        error.value = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.'
-      } else {
-        error.value = `Error de configuración: ${err.message}`
-      }
-    } finally {
-      loading.value = false
-    }
-  }
-  
-  const formatCurrency = (value, currency) => {
-    if (typeof value === 'number') {
-      return new Intl.NumberFormat('es-AR', { style: 'currency', currency: currency || filtros.codigo_moneda }).format(value)
-    }
-    return value
-  }
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-'
-    // Asumiendo formato YYYY-MM-DD
-    const [year, month, day] = dateString.split('-')
-    return `${day}/${month}/${year}`
-  }
+    <div v-else-if="store.resultados && store.resultados.length === 0" class="no-results-card">
+      <p>No se encontraron resultados para los filtros seleccionados.</p>
+    </div>
+  </div>
+</template>
 
-  
-  
-  </script>
+<script setup>
+import '@/assets/estadoResultados.css'
+import { useEstadoResultadosStore } from '@/store/useEstadoResultadosStore'
+
+const store = useEstadoResultadosStore()
+
+const formatCurrency = (value, currency) => {
+  if (typeof value === 'number') {
+    return new Intl.NumberFormat('es-AR', { 
+      style: 'currency', 
+      currency: currency || store.filtros.codigo_moneda 
+    }).format(value)
+  }
+  return value
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-'
+  const [year, month, day] = dateString.split('-')
+  return `${day}/${month}/${year}`
+}
+</script>

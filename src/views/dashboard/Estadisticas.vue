@@ -1,15 +1,34 @@
 <template>
-  <div class="cuadrante" id="estadisticas">
+  <div class="estado-resultados-container" id="estadisticas">
     <div class="header-section">
       <h2>Estadísticas</h2>
-      <p class="subtitle">Visualiza el resumen de gastos anuales con filtros personalizados</p>
+      <p class="description">Visualiza el resumen anual de tus movimientos financieros.</p>
     </div>
 
-    <div class="filtros-container">
+    <!-- Pestañas Superiores -->
+    <div class="tabs-modernas">
+      <button 
+        class="tab-btn" 
+        :class="{ active: store.tabActiva === 'gastos' }"
+        @click="store.setTab('gastos')"
+      >
+        Gastos
+      </button>
+      <button 
+        class="tab-btn" 
+        :class="{ active: store.tabActiva === 'ingresos' }"
+        @click="store.setTab('ingresos')"
+      >
+        Ingresos
+      </button>
+    </div>
+
+    <!-- Filtros Glassmorphism -->
+    <div class="filtros-glass">
       <div class="filtros-grid">
         <div class="form-group">
           <label for="anio">Año</label>
-          <select id="anio" v-model="anioSeleccionado" class="form-select">
+          <select id="anio" v-model="anioSeleccionado">
             <option disabled value="">Seleccione un año</option>
             <option v-for="anio in anios" :key="anio" :value="anio">{{ anio }}</option>
           </select>
@@ -17,7 +36,7 @@
 
         <div class="form-group">
           <label for="titular">Titular</label>
-          <select id="titular" v-model="codTitular" class="form-select">
+          <select id="titular" v-model="codTitular">
             <option :value="0">Todos los titulares</option>
             <option v-for="titular in titulares" :key="titular.codigo" :value="titular.codigo">
               {{ titular.nombre }}
@@ -26,57 +45,54 @@
         </div>
 
         <div class="form-group">
-          <label for="tipo_gasto">Tipo de Gasto</label>
-          <select id="tipo_gasto" v-model="codGasto" class="form-select">
+          <label for="tipo_concepto">{{ store.tabActiva === 'gastos' ? 'Tipo de Gasto' : 'Tipo de Ingreso' }}</label>
+          <select id="tipo_concepto" v-model="codConcepto">
             <option :value="0">Todos los conceptos</option>
-            <option v-for="tipo in tiposGasto" :key="tipo.codigo" :value="tipo.codigo">
+            <option v-for="tipo in tiposConcepto" :key="tipo.codigo" :value="tipo.codigo">
               {{ tipo.descripcion }}
             </option>
           </select>
         </div>
+      </div>
 
-        <div class="actions">
-          <button
-            class="btn-consultar"
-            @click="fetchData"
-            :disabled="loading"
-          >
-            <span v-if="loading" class="loader"></span>
-            <span v-else>Consultar Reporte</span>
-          </button>
-        </div>
+      <div class="actions">
+        <button @click="fetchData" :disabled="loading" class="btn-modern">
+          <div v-if="loading" class="loader-spinner"></div>
+          <span v-else>Consultar Reporte</span>
+        </button>
       </div>
     </div>
 
-    <!-- Mostrar tabla solo si hay datos -->
-    <transition name="fade">
-      <div v-if="resultado !== null" class="resultados-card">
-        <div class="card-header">
-          <h4>Resumen Anual: {{ anioSeleccionado }}</h4>
-          <p>Total acumulado hasta Diciembre inclusive</p>
-        </div>
+    <!-- Mensajes de Error -->
+    <div v-if="store.error" class="error-card">
+      <p>{{ store.error }}</p>
+    </div>
 
-        <div class="table-responsive">
-          <table class="stats-table">
+    <!-- Resultados -->
+    <transition name="fade">
+      <div v-if="resultado !== null" class="resultados-section">
+        <div class="table-container">
+          <table class="modern-table">
             <thead>
               <tr>
                 <th>Periodo</th>
                 <th>Concepto</th>
-                <th>Monto Total</th>
+                <th style="text-align: right;">Monto Total</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>Año {{ anioSeleccionado }}</td>
                 <td>{{ getConceptoLabel() }}</td>
-                <td class="monto-total">{{ formatCurrency(resultado.total || 0) }}</td>
+                <td class="monto" :class="store.tabActiva === 'gastos' ? 'monto-negativo' : 'monto-positivo'" style="text-align: right;">
+                  {{ formatCurrency(resultado.total || 0) }}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <div v-else-if="!loading && hasQueried" class="no-results-msg">
-        <i class="info-icon">!</i>
+      <div v-else-if="!loading && hasQueried" class="no-results-card">
         <p>No se encontraron datos para los filtros seleccionados en el año {{ anioSeleccionado }}.</p>
       </div>
     </transition>
@@ -84,27 +100,35 @@
 </template>
 
 <script setup>
-import '@/assets/estadisticas.css'
-import { ref, onMounted, computed } from 'vue'
+import '@/assets/estadoResultados.css' // Reutilizamos los estilos de Estado de Resultados
+import { ref, onMounted, computed, watch } from 'vue'
 import { useEstadisticasStore } from '@/store/useEstadisticasStore'
 
-const estadisticasStore = useEstadisticasStore()
+const store = useEstadisticasStore()
 
 const resultado = ref(null)
 const anioSeleccionado = ref("")
 const hasQueried = ref(false)
-
-const titulares = computed(() => estadisticasStore.titulares)
-const tiposGasto = computed(() => estadisticasStore.tiposGasto)
-const anios = computed(() => estadisticasStore.anios)
-const loading = computed(() => estadisticasStore.loading)
-
 const codTitular = ref(0)
-const codGasto = ref(0)
+const codConcepto = ref(0)
+
+const titulares = computed(() => store.titulares)
+const anios = computed(() => store.anios)
+const loading = computed(() => store.loading)
+
+const tiposConcepto = computed(() => {
+  return store.tabActiva === 'gastos' ? store.tiposGasto : store.tiposIngreso
+})
+
+// Resetear filtros al cambiar de pestaña
+watch(() => store.tabActiva, () => {
+  resultado.value = null
+  hasQueried.value = false
+  codConcepto.value = 0
+})
 
 onMounted(async () => {
-  console.log('Montado: fetch filtros de estadísticas via Modular Pinia')
-  await estadisticasStore.fetchInitialData()
+  await store.fetchInitialData()
 })
 
 const fetchData = async () => {
@@ -117,12 +141,19 @@ const fetchData = async () => {
   hasQueried.value = false
 
   try {
-    await estadisticasStore.fetchReportData({
-      cod_titular: codTitular.value,
-      cod_gasto: codGasto.value
-    })
+    if (store.tabActiva === 'gastos') {
+      await store.fetchReportData({
+        cod_titular: codTitular.value,
+        cod_gasto: codConcepto.value
+      })
+    } else {
+      await store.fetchReportDataIngresos({
+        cod_titular: codTitular.value,
+        cod_ingreso: codConcepto.value
+      })
+    }
     
-    const dataForYear = estadisticasStore.reporteData.find(item => item.anio === parseInt(anioSeleccionado.value))
+    const dataForYear = store.reporteData.find(item => item.anio === parseInt(anioSeleccionado.value))
     
     if (dataForYear) {
       resultado.value = dataForYear
@@ -132,13 +163,12 @@ const fetchData = async () => {
     hasQueried.value = true
   } catch (error) {
     console.error("Error al obtener datos:", error)
-    alert("No se pudieron obtener los datos del reporte anual")
   }
 }
 
 const getConceptoLabel = () => {
-  if (codGasto.value === 0) return 'Todos los conceptos'
-  const tipo = tiposGasto.value.find(t => t.codigo === codGasto.value)
+  if (codConcepto.value === 0) return 'Todos los conceptos'
+  const tipo = tiposConcepto.value.find(t => t.codigo === codConcepto.value)
   return tipo ? tipo.descripcion : 'Concepto seleccionado'
 }
 
@@ -150,3 +180,11 @@ const formatCurrency = (value) => {
 }
 </script>
 
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+</style>
