@@ -1,4 +1,5 @@
 import api from '@/helpers/api';
+import { Gasto } from '@/models/gastos';
 
 const gastosApi = {
     getTitulares() {
@@ -7,7 +8,7 @@ const gastosApi = {
     getTiposGasto() {
         return api.get('/tipos-gasto');
     },
-    saveGasto(gasto: any) {
+    saveGasto(gasto: Gasto) {
         return api.post('/gastos', gasto);
     }
 };

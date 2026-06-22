@@ -29,6 +29,21 @@
               <option value="USD">USD</option>
             </select>
           </div>
+          <div class="tabs">
+            <button
+              :class="{ active: tabActiva === 'gastos' }"
+              @click="tabActiva = 'gastos'"
+            >
+              Gastos
+            </button>
+
+            <button
+              :class="{ active: tabActiva === 'ingresos' }"
+              @click="tabActiva = 'ingresos'"
+            >
+              Ingresos
+            </button>
+          </div>
         </div>
       </div>
   
@@ -148,4 +163,7 @@
     const [year, month, day] = dateString.split('-')
     return `${day}/${month}/${year}`
   }
+
+  
+  
   </script>
