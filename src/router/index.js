@@ -22,7 +22,7 @@ const routes = [
     ]
   },
   // Redirección para compatibilidad con links viejos
-  { path: '/inicio', redirect: '/gastos' }
+  { path: '/inicio', redirect: '/home' }
 ]
 
 const router = createRouter({
