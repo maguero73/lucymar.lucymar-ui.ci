@@ -33,13 +33,28 @@
           <h3>Más Módulos</h3>
           <p>Estamos trabajando en nuevas herramientas para ti.</p>
         </div>
+      
+      <div class="version-footer">
+          <div>lucymar_app</div>
+          <div>v{{ appStore.version }}</div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// No logic needed for now
+import { ref, onMounted } from 'vue'
+import { useAppStore } from '@/store/useAppStore'
+
+const version = ref('')
+
+const appStore = useAppStore()
+
+onMounted(() => {
+    appStore.cargarVersion()
+})
+
 </script>
 
 <style scoped>
@@ -184,5 +199,19 @@
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.version-footer {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    text-align: center;
+
+    font-size: 12px;
+    color: #888;
+
+    user-select: none;
 }
 </style>

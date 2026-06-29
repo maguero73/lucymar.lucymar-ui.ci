@@ -1,7 +1,7 @@
 <template>
   <div class="estado-resultados-container">
     <div class="header-section">
-      <h2>Gestión Financiera</h2>
+      <h2>Flujo de Efectivo</h2>
       <p class="description">Carga tus movimientos diarios de gastos e ingresos.</p>
     </div>
 

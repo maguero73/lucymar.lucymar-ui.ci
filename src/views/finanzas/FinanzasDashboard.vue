@@ -9,7 +9,7 @@
       <!-- Gestión Financiera -->
       <router-link to="/finanzas/gestion" class="dashboard-card">
         <div class="card-icon">💼</div>
-        <h3>Gestión Financiera</h3>
+        <h3>Flujo de Efectivo</h3>
         <p>Carga de gastos e ingresos con una interfaz moderna y organizada.</p>
         <span class="card-badge">Acceder</span>
       </router-link>
